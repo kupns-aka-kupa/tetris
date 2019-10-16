@@ -1,5 +1,5 @@
-#include "Header.h"
-#include "Board.h"
+#include "Header/Header.h"
+#include "Board/Board.h"
 
 bool run = true;
 using constants::size;

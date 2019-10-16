@@ -1,6 +1,6 @@
-#include "Header.h"
+#include "../Header/Header.h"
 #include "Board.h"
-#include "Events.h"
+#include "../Events/Events.h"
 
 using constants::hDC;
 using constants::size;
