@@ -1,25 +1,24 @@
-#include "../Header/Header.h"
-#include "Block.h"
+#include "block.h"
 
 using constants::hDC;
-using constants::size;
+using constants::pSize;
 
-HBRUSH hRedBrush = CreateSolidBrush(RGB(255, 0, 0));
-HBRUSH hGreenBrush = CreateSolidBrush(RGB(0, 255, 0));
-HBRUSH hBlueBrush = CreateSolidBrush(RGB(0, 0, 255));
-HBRUSH hPurpleBrush = CreateSolidBrush(RGB(255, 0, 255));
-HBRUSH hYellowBrush = CreateSolidBrush(RGB(255, 255, 0));
-HBRUSH hCyanBrush = CreateSolidBrush(RGB(0, 255, 255));
+static Uint32 hRedBrush = SDL_MapRGB(hDC->format, 200, 0, 0);
+static Uint32 hGreenBrush = SDL_MapRGB(hDC->format, 0, 200, 0);
+static Uint32 hBlueBrush = SDL_MapRGB(hDC->format, 0, 0, 200);
+static Uint32 hPurpleBrush = SDL_MapRGB(hDC->format, 200, 0, 200);
+static Uint32 hYellowBrush = SDL_MapRGB(hDC->format, 200, 200, 0);
+static Uint32 hCyanBrush = SDL_MapRGB(hDC->format, 0, 200, 200);
 
-bool T_block[9] = { 0, 1, 0, 1, 1, 1, 0, 0, 0 };
-bool Ll_block[9] = { 1, 0, 0, 1, 1, 1, 0, 0, 0 };
-bool Lr_block[9] = { 0, 0, 1, 1, 1, 1, 0, 0, 0 };
-bool Zl_block[9] = { 0, 1, 1, 1, 1, 0, 0, 0, 0 };
-bool Zr_block[9] = { 1, 1, 0, 0, 1, 1, 0, 0, 0 };
-bool I_block[16] = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
-bool Sq_block[4] = { 1, 1, 1, 1 };
+static bool T_block[9] = { 0, 1, 0, 1, 1, 1, 0, 0, 0 };
+static bool Ll_block[9] = { 1, 0, 0, 1, 1, 1, 0, 0, 0 };
+static bool Lr_block[9] = { 0, 0, 1, 1, 1, 1, 0, 0, 0 };
+static bool Zl_block[9] = { 0, 1, 1, 1, 1, 0, 0, 0, 0 };
+static bool Zr_block[9] = { 1, 1, 0, 0, 1, 1, 0, 0, 0 };
+static bool I_block[16] = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+static bool Sq_block[4] = { 1, 1, 1, 1 };
 
-BlockType block_types[7]
+static BlockType block_types[7]
 {
 	BlockType(T_block),
 	BlockType(Ll_block),
@@ -30,72 +29,69 @@ BlockType block_types[7]
 	BlockType(I_block, 16, 4),
 };
 
-HBRUSH hBrushes[6] = {
-	hRedBrush,
-	hGreenBrush,
-	hBlueBrush,
-	hPurpleBrush,
-	hYellowBrush,
-	hCyanBrush
+static Uint32 hBrushes[6] = {
+    hRedBrush,
+    hGreenBrush,
+    hBlueBrush,
+    hPurpleBrush,
+    hYellowBrush,
+    hCyanBrush
 };
 
 BlockType::BlockType(bool* type, int len, int delim)
 {
-	bool_filter = new bool[len];
-	for (int i = 0; i < len; i++)
-	{
-		bool_filter[i] = type[i];
-	}
-	block_len = len;
-	block_delim = delim;
+    bool_filter = new bool[len];
+    for (int i = 0; i < len; i++)
+    {
+        bool_filter[i] = type[i];
+    }
+    block_len = len;
+    block_delim = delim;
 }
 
-int *Block::get_position()
+inline int *Block::get_position()
 {
-	return position;
+    return position;
 }
 
-BlockType *Block::get_type()
+inline BlockType *Block::get_type()
 {
-	return &type;
+    return &type;
 }
 
 BlockType Block::init()
 {
-	int hBrushesLen = sizeof(hBrushes) / sizeof(&hBrushes);
-	int block_filter_len = sizeof(block_types) / sizeof(block_types[0]);
-	std::srand(unsigned(std::time(0)));
-	Brush = hBrushes[std::rand() % hBrushesLen];
-	int type_index = std::rand() % block_filter_len;
-	type = BlockType(
-		block_types[type_index].bool_filter,
-		block_types[type_index].block_len,
-		block_types[type_index].block_delim
-		);
-	return type;
+    int hBrushesLen = sizeof(hBrushes) / sizeof(&hBrushes);
+    int block_filter_len = sizeof(block_types) / sizeof(block_types[0]);
+    std::srand(unsigned(std::time(nullptr)));
+    Brush = std::rand() % hBrushesLen;
+    int type_index = std::rand() % block_filter_len;
+    type = BlockType(
+        block_types[type_index].bool_filter,
+        block_types[type_index].block_len,
+        block_types[type_index].block_delim
+        );
+    return type;
 }
 
 void Block::draw_block(int x_0, int y_0)
 {
-	SelectObject(hDC, Brush);
-	SelectObject(hDC, GetStockObject(BLACK_PEN));
-
-	for(int i = 0; i < type.block_delim; i++)
-	{	
-		for (int j = 0; j < type.block_delim; j++)
-		{
-			if (type.bool_filter[i * type.block_delim + j])
-			{
-				RECT rect = { 
-					x_0 + (j + position[0]) * size,
-					y_0 + (i + position[1]) * size,
-					x_0 + (j + position[0] + 1) * size,
-					y_0 + (i + position[1] + 1) * size
-				};
-				Rectangle(hDC, rect.left, rect.top, rect.right, rect.bottom);
-			}
-		}
-	}
+    for(int i = 0; i < type.block_delim; i++)
+    {
+        for (int j = 0; j < type.block_delim; j++)
+        {
+            if (type.bool_filter[i * type.block_delim + j])
+            {
+                SDL_Rect rect = {
+                    x_0 + (j + position[0]) * pSize,
+                    y_0 + (i + position[1]) * pSize,
+                    x_0 + (j + position[0] + 1) * pSize,
+                    y_0 + (i + position[1] + 1) * pSize
+                };
+                SDL_FillRect(hDC, &rect, hBrushes[Brush]);
+            }
+        }
+    }
 }
 
 bool Block::check_availability(int x_vector, bool* filter, bool* board_status, int n, int y_vector)

@@ -1,4 +1,6 @@
 #pragma once
+#include "view.h"
+
 struct BlockType 
 {
 	bool *bool_filter;
@@ -7,7 +9,7 @@ struct BlockType
 
 	BlockType()
 	{
-		bool_filter = NULL;
+        bool_filter = nullptr;
 		block_len = 9;
 		block_delim = 3;
 	}
@@ -18,6 +20,9 @@ struct BlockType
 
 class Block
 {
+    int position[2];
+    BlockType type;
+    int Brush;
 
 public:
 
@@ -39,10 +44,5 @@ public:
 	bool check_availability(int x_vector, bool *filter, bool* board_status, int n, int y_vector);
 	bool rotate(bool* board_status, int n);
 
-	BlockType init();
-
-private:
-	int position[2];
-	BlockType type;
-	HBRUSH Brush;
+    BlockType init();
 };

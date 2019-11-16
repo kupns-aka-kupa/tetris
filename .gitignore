@@ -338,3 +338,9 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 >>>>>>> c1dac3cad06a0fcd55f1dfc465c41eda0fd63e05
+
+#user
+.kde4
+.project
+tetris.kdev4
+build
