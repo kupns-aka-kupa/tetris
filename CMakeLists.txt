@@ -2,51 +2,76 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Tetris VERSION 1.0 LANGUAGES CXX)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-
-configure_file(config.h.in ../include/config.h)
+set(AUDIO OFF)
+set(INFO_SWAP OFF)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O2")
 
-set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+set(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/bin")
+set(STATIC_ASSETS_PATH "${PROJECT_SOURCE_DIR}/static")
 
-#set(SDL2_INCLUDE_DIR /usr/local/include/SDL2)
-#set(SDL2_LIBRARY /usr/local/lib/libSDL2.so)
+set(INCLUDE_DIR "${PROJECT_SOURCE_DIR}/inc")
+set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
+
+configure_file(config.h.in ${INCLUDE_DIR}/config.h)
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
-if(NOT SDL2_FOUND)
-        message(SEND_ERROR "Failed to find SDL")
-        return()
-else()
-        include_directories(${PROJECT_NAME} ${SDL2_INCLUDE_DIRS})
+
+if(NOT ${SDL2_FOUND})
+    message(SEND_ERROR "Failed to find SDL")
+    return()
+
+elseif(NOT ${SDL2_image_FOUND})
+    message(SEND_ERROR "Failed to find SDL2_image")
+    return()
+
+elseif(NOT ${SDL2_ttf_FOUND})
+    message(SEND_ERROR "Failed to find SDL_ttf")
+    return()
+
 endif()
 
-set(SUB_DIRS
-    "${PROJECT_SOURCE_DIR}/src/*"
-    "${PROJECT_SOURCE_DIR}/include"
+include_directories(
+    ${INCLUDE_DIR}
+    ${SOURCE_DIR}
+    ${SDL2_INCLUDE_DIR}
+    ${SDL2_IMAGE_INCLUDE_DIR}
+    ${SDL2_TTF_LIBRARIES}
 )
 
-#include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${SUB_DIRS})
-
-file(GLOB SOURCES
-    "src/main.cpp"
-    "src/*/*.cpp"
+file(GLOB SOURCE_FILES
+    "${SOURCE_DIR}/*.cpp"
 )
 
-file(GLOB HEADERS
-    "include/*.h"
+file(GLOB HEADER_FILES
+    "${INCLUDE_DIR}/*.h"
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-    ${SDL2_LIBRARIES}
+target_link_libraries(${PROJECT_NAME}
+    ${SDL2_LIBRARY}
+    ${SDL2_IMAGE_LIBRARIES}
+    ${SDL2_TTF_LIBRARIES}
 )
 
-add_definitions(-Wall -O2)
+if(AUDIO)
+
+    if(NOT ${SDL2_mixer_FOUND})
+        message(SEND_ERROR "Failed to find SDL_mixer")
+        return()
+    endif()
+
+    find_package(SDL2_mixer REQUIRED)
+    include_directories(${SDL2_MIXER_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${SDL2_MIXER_LIBRARIES})
+
+endif(AUDIO)
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
