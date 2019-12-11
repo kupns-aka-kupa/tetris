@@ -6,13 +6,12 @@
 >
 > *Alexey Pazhitnov*
 
-![screenshot](./screenshot1.png)
-![screenshot](./screenshot2.png)
+![screenshot](./screenshot.png)
 
 ## Table of contents
 
 - [Description](#Description)
-    
+
 - [Installation](#Installation)
 
     1. Installing SDL2 libraries:
@@ -34,6 +33,22 @@
 - [Notes](#Notes)
 
 ## <a name="Description"></a> Description
+
+### Standard game
+
+Standard game is a well-known tetris with standard features and mechanics (Details below).
+
+### Modificated game
+
+Modification, besides ***colored blocks*** under modifier,
+
+- `STANDART` : No comments,
+
+brings ***black blocks*** that are separated by modifiers and randomly accept one of the above conditions.:
+
+- `BLOWUP` : Explodes (cleans) blocks in a radius of touchdown,
+- `FAKE` : Disappears, as if he was not there,
+- `FLUID` : May lose its shape upon landing and clog the gaps in your tetris, if you "pour" it correctly.
 
 ## <a name="Installation"></a> Installation
 
@@ -74,7 +89,28 @@
 
 ## <a name="Notes"></a> Notes
 
-**Keyboard controls**
+The number of **points** received depends on the **count** of cleared lines,
+
+Game options can be changed **before** compilation in **CmakeLists.txt**
+
+___
+
+<center><h3>Game options</h3></center>
+
+#### General
+
+- **Default game mode** (`ON` / `OFF`) = `DEFAULT_TETRIS_MODE` 
+
+- **Audio** (`ON` / `OFF`) = `AUDIO ON/OFF` (audio now not working, sorry)
+
+#### Info panel
+
+- **Availability** (`ON` / `OFF`) = `INFO`
+
+- **Location** (`ON` / `OFF`) = `INFO_SWAP`
+___
+
+<center><h3>Keyboard controls</h3></center>
 
 Action|Key  |Alternative
 ------|-----|-----------
@@ -82,3 +118,5 @@ left  |a    |ARROW LEFT
 right |d    |ARROW RIGHT
 drop  |SPACE|-
 rotate|w    |ARROW UP
+
+Already collect this `fucking` tetris !!!

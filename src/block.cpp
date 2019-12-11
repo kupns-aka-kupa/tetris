@@ -30,6 +30,15 @@ static BlockType BLOCK_TYPES[7]
     BlockType(I_block, 16, 4),
 };
 
+#ifdef DEFAULT_TETRIS_MODE_OFF
+
+enum BLOCK_MODIFIERS{
+    STANDART,
+    BLOWUP,
+    FAKE,
+    FLUID
+};
+
 Uint8 *BLOCK_COLORS[7] = {
     RED,
     ORANGE,
@@ -39,6 +48,19 @@ Uint8 *BLOCK_COLORS[7] = {
     PURPLE,
     BLACK
 };
+
+#else
+
+Uint8 *BLOCK_COLORS[6] = {
+    RED,
+    ORANGE,
+    BLUE,
+    GREEN,
+    MAGENTA,
+    PURPLE
+};
+
+#endif
 
 int *Block::getPosition()
 {
@@ -62,12 +84,14 @@ Block::Block(SDL_Renderer *renderer, bool *boardBoolStatus)
 
     int bCLen = sizeof(BLOCK_COLORS) / sizeof(&BLOCK_COLORS);
     int bTLen = sizeof(BLOCK_TYPES) / sizeof(BLOCK_TYPES[0]);
+    int typeIndex = std::rand() % bTLen;
 
     std::srand(unsigned(std::time(nullptr)));
     brushN = std::rand() % bCLen;
-    fake = std::rand() % 2;
-
-    int typeIndex = std::rand() % bTLen;
+#ifdef DEFAULT_TETRIS_MODE_OFF
+    if (brushN != 6) modifier = STANDART;
+    else modifier = std::rand() % 3 + 1;
+#endif
     type = BlockType(
         BLOCK_TYPES[typeIndex].boolFilter,
         BLOCK_TYPES[typeIndex].blockMatrLen,
@@ -78,7 +102,15 @@ Block::Block(SDL_Renderer *renderer, bool *boardBoolStatus)
     position[1] = 0;
 }
 
-void Block::render()
+void Block::render(SDL_Rect *cell)
+{
+    SDL_SetRenderDrawColor(renderer, BLOCK_COLORS[brushN][0], BLOCK_COLORS[brushN][1], BLOCK_COLORS[brushN][2], 0xFF);
+    SDL_RenderFillRect(renderer, cell);
+    SDL_SetRenderDrawColor(renderer, WHITE[0], WHITE[1], WHITE[2], 0xFF);
+    SDL_RenderDrawRect(renderer, cell);
+}
+
+void Block::coordsMapping(int x0, int y0, bool dynamic)
 {
     for(int i = 0; i < type.blockDimension; i++)
     {
@@ -86,16 +118,26 @@ void Block::render()
         {
             if (type.boolFilter[i * type.blockDimension + j])
             {
-                SDL_Rect cell{
-                    FO + (j + position[0]) * BLC_SCL,
-                    FO + (i + position[1]) * BLC_SCL,
-                    BLC_SCL,
-                    BLC_SCL
-                };
-                SDL_SetRenderDrawColor(renderer, BLOCK_COLORS[brushN][0], BLOCK_COLORS[brushN][1], BLOCK_COLORS[brushN][2], 0xFF);
-                SDL_RenderFillRect(renderer, &cell);
-                SDL_SetRenderDrawColor(renderer, WHITE[0], WHITE[1], WHITE[2], 0xFF);
-                SDL_RenderDrawRect(renderer, &cell);
+                SDL_Rect cell;
+                if (dynamic)
+                {
+                    cell = SDL_Rect{
+                        x0 + (j + position[0]) * BLC_SCL,
+                        y0 + (i + position[1]) * BLC_SCL,
+                        BLC_SCL,
+                        BLC_SCL
+                    };
+                }
+                else
+                {
+                    cell = SDL_Rect{
+                        x0 + j * BLC_SCL,
+                        y0 + i * BLC_SCL,
+                        BLC_SCL,
+                        BLC_SCL
+                    };
+                }
+                render(&cell);
             }
         }
     }
@@ -216,18 +258,54 @@ bool Block::moving(int x_vector)
     else return 0;
 }
 
-void Block::freeze(int *boardColorStatus)
+bool Block::freeze(int *boardColorStatus)
 {
+#ifdef DEFAULT_TETRIS_MODE_OFF
+    if (modifier == FAKE) return true;
+#endif
     for (int i = 0; i < type.blockDimension; i++)
     {
         for (int j = 0; j < type.blockDimension; j++)
         {
             bool cell = type.boolFilter[i * type.blockDimension + j];
-            if (cell)
+            if (i + position[1] < 4) return false;
+#ifdef DEFAULT_TETRIS_MODE_OFF
+            else if (modifier == BLOWUP)
             {
-                boolStatus[(i + position[1]) * CC + j + position[0]] = cell;
-                boardColorStatus[(i + position[1]) * CC + j + position[0]] = brushN;
+                boolStatus[(i + position[1]) * CC + j + position[0]] = 0;
+                boardColorStatus[(i + position[1]) * CC + j + position[0]] = 0;
+            }
+#endif
+            else
+            {
+                if (cell)
+                {
+#ifdef DEFAULT_TETRIS_MODE_OFF
+                    if (modifier == FLUID)
+                    {
+                        int row = i;
+                        while(row + position[1] + 1 <= RC && !boolStatus[(row + position[1]) * CC + j + position[0]])
+                        {
+                            flow(row, j, boardColorStatus);
+                            row++;
+                        }
+                    }
+                    else
+                    {
+#endif
+                        flow(i, j, boardColorStatus);
+#ifdef DEFAULT_TETRIS_MODE_OFF
+                    }
+#endif
+                }
             }
         }
     }
+    return true;
+}
+
+void Block::flow(int row, int collumn, int *boardColorStatus)
+{
+    boolStatus[(row + position[1]) * CC + collumn + position[0]] = 1;
+    boardColorStatus[(row + position[1]) * CC + collumn + position[0]] = brushN;
 }

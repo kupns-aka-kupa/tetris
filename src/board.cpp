@@ -1,5 +1,15 @@
 #include "board.h"
 
+Board::Board()
+{
+    colorStatus = nullptr;
+    boolStatus = nullptr;
+    currentBlock = nullptr;
+    nextBlock = nullptr;
+    sWnd = nullptr;
+    renderer = nullptr;
+}
+
 Board::Board(SDL_Window *sWnd, SDL_Renderer *renderer)
 {
     this->sWnd = sWnd;
@@ -11,32 +21,33 @@ Board::Board(SDL_Window *sWnd, SDL_Renderer *renderer)
         colorStatus[i] = 0;
         boolStatus[i] = 0;
     }
+    currentBlock = newBlock();
+    nextBlock = newBlock();
 }
 
 Block *Board::newBlock()
 {
-    block = new Block(renderer, boolStatus);
-    return block;
+    return new Block(renderer, boolStatus);
 }
 
-bool Board::keyboardHandle(SDL_KeyboardEvent *key)
+int Board::keyboardHandle(SDL_KeyboardEvent *key)
 {
     if(key->keysym.sym == SDLK_w || key->keysym.sym == SDLK_UP)
     {
-        block->rotate();
+        currentBlock->rotate();
     }
     else if (key->keysym.sym == SDLK_SPACE)
     {
-        while (fallCheck()) {}
+        while (fallCheck() == 1) continue;
         return true;
     }
     else if (key->keysym.sym == SDLK_a || key->keysym.sym == SDLK_LEFT)
     {
-        block->moving(-1);
+        currentBlock->moving(-1);
     }
     else if (key->keysym.sym == SDLK_d || key->keysym.sym == SDLK_RIGHT)
     {
-        block->moving(1);
+        currentBlock->moving(1);
     }
     else if (key->keysym.sym == SDLK_s || key->keysym.sym == SDLK_DOWN)
     {
@@ -54,7 +65,9 @@ void Board::drawFrames()
     SDL_Rect mainframe TETRIS_FRAME;
     SDL_SetRenderDrawColor(renderer, WHITE[0], WHITE[1], WHITE[2], 0xFF);
     SDL_RenderDrawRect(renderer, &mainframe);
+    SDL_RenderDrawLine(renderer, mainframe.x , mainframe.y + 4 * BLC_SCL, mainframe.x + mainframe.w, mainframe.y + 4 * BLC_SCL );
 
+#ifdef INFO_ON
     SDL_Rect gameInfoFrame GAME_INFO_FRAME;
     SDL_SetRenderDrawColor(renderer, WHITE[0], WHITE[1], WHITE[2], 0xFF);
     SDL_RenderDrawRect(renderer, &gameInfoFrame);
@@ -62,6 +75,7 @@ void Board::drawFrames()
     SDL_Rect newBlockInfoFrame BLOCK_INFO_FRAME;
     SDL_SetRenderDrawColor(renderer, WHITE[0], WHITE[1], WHITE[2], 0xFF);
     SDL_RenderDrawRect(renderer, &newBlockInfoFrame);
+#endif
 }
 
 void Board::drawCells()
@@ -92,7 +106,15 @@ void Board::render()
 {
     drawFrames();
     drawCells();
-    block->render();
+    currentBlock->coordsMapping();
+#ifdef INFO_ON
+    int nBIF[4] = BLOCK_INFO_FRAME;
+    nextBlock->coordsMapping(
+            nBIF[0] + (BLOCK_IFNO_PANEL_WIDTH / nextBlock->getType()->blockDimension / 2) + FO / 2,
+            nBIF[1] + (BLOCK_IFNO_PANEL_HEIGHT / nextBlock->getType()->blockDimension / 2) + FO / 2,
+            false
+            );
+#endif
 }
 
 void Board::upperLayerDrop(int lineN)
@@ -107,18 +129,20 @@ void Board::upperLayerDrop(int lineN)
     }
 }
 
-bool Board::fallCheck()
+int Board::fallCheck()
 {
-    if (!block->falling())
+    if (!currentBlock->falling())
     {
-        block->freeze(colorStatus);
-        newBlock();
-        return false;
+        if (currentBlock->freeze(colorStatus))
+        {
+            delete currentBlock;
+            currentBlock = nextBlock;
+            nextBlock = newBlock();
+            return false;
+        }
+        else return -1;
     }
-    else
-    {
-        return true;
-    }
+    else return true;
 }
 
 uint Board::checkLines()
@@ -151,4 +175,14 @@ void Board::clearLine(int lineN)
         boolStatus[lineN * CC + j] = 0;
     }
     upperLayerDrop(lineN);
+}
+
+Board::~Board()
+{
+    delete []colorStatus;
+    delete []boolStatus;
+    delete currentBlock;
+    delete nextBlock;
+    sWnd = nullptr;
+    renderer = nullptr;
 }

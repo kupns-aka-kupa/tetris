@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Tetris VERSION 1.0 LANGUAGES CXX)
 
+set(DEFAULT_TETRIS_MODE OFF)
 set(AUDIO OFF)
+set(INFO ON)
 set(INFO_SWAP OFF)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -21,7 +23,6 @@ configure_file(config.h.in ${INCLUDE_DIR}/config.h)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
-
 
 if(NOT ${SDL2_FOUND})
     message(SEND_ERROR "Failed to find SDL")

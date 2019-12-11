@@ -9,37 +9,25 @@ class Board
 {
     int *colorStatus;
     bool *boolStatus;
-    Block *block;
+    Block *currentBlock;
+    Block *nextBlock;
 
     SDL_Window *sWnd;
     SDL_Renderer *renderer;
 
 public:
-    Board()
-    {
-        colorStatus = nullptr;
-        boolStatus = nullptr;
-        block = nullptr;
-        sWnd = nullptr;
-        renderer = nullptr;
-    }
-
+    Board();
     Board(SDL_Window *sWnd, SDL_Renderer *renderer);
+    ~Board();
 
-    ~Board()
-    {
-        delete []colorStatus;
-        delete []boolStatus;
-        delete block;
-    }
     int get_cl();
 
     void drawFrames();
     void drawCells();
     void render();
 
-    bool keyboardHandle(SDL_KeyboardEvent *key);
-    bool fallCheck();
+    int keyboardHandle(SDL_KeyboardEvent *key);
+    int fallCheck();
     uint checkLines();
     void clearLine(int lineN);
     void upperLayerDrop(int lineN);
