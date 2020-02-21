@@ -101,7 +101,7 @@ ___
 
 - **Default game mode** (`ON` / `OFF`) = `DEFAULT_TETRIS_MODE` 
 
-- **Audio** (`ON` / `OFF`) = `AUDIO` (audio now not working, sorry)
+- **Audio** (`ON` / `OFF`) = `AUDIO`
 
 #### Info panel
 
@@ -119,4 +119,3 @@ right |d    |ARROW RIGHT
 drop  |SPACE|-
 rotate|w    |ARROW UP
 
-Already collect this `fucking` tetris !!!
