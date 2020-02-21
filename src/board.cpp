@@ -1,11 +1,18 @@
 #include "board.h"
 
-Board::Board()
+Board::Board() : colorStatus(nullptr),
+    boolStatus(nullptr),
+    currentBlock(nullptr),
+    nextBlock(nullptr),
+    sWnd(nullptr),
+    renderer(nullptr) {}
+
+Board::~Board()
 {
-    colorStatus = nullptr;
-    boolStatus = nullptr;
-    currentBlock = nullptr;
-    nextBlock = nullptr;
+    delete []colorStatus;
+    delete []boolStatus;
+    delete currentBlock;
+    delete nextBlock;
     sWnd = nullptr;
     renderer = nullptr;
 }
@@ -23,6 +30,7 @@ Board::Board(SDL_Window *sWnd, SDL_Renderer *renderer)
     }
     currentBlock = newBlock();
     nextBlock = newBlock();
+    blockShadow = updateBlockShadow();
 }
 
 Block *Board::newBlock()
@@ -53,6 +61,7 @@ int Board::keyboardHandle(SDL_KeyboardEvent *key)
     {
         return fallCheck();
     }
+    blockShadow = updateBlockShadow();
     return 0;
 }
 
@@ -65,7 +74,7 @@ void Board::drawFrames()
     SDL_Rect mainframe TETRIS_FRAME;
     SDL_SetRenderDrawColor(renderer, WHITE[0], WHITE[1], WHITE[2], 0xFF);
     SDL_RenderDrawRect(renderer, &mainframe);
-    SDL_RenderDrawLine(renderer, mainframe.x , mainframe.y + 4 * BLC_SCL, mainframe.x + mainframe.w, mainframe.y + 4 * BLC_SCL );
+    SDL_RenderDrawLine(renderer, mainframe.x , mainframe.y + 4 * BLC_SCL, mainframe.x + mainframe.w, mainframe.y + 4 * BLC_SCL);
 
 #ifdef INFO_ON
     SDL_Rect gameInfoFrame GAME_INFO_FRAME;
@@ -106,16 +115,33 @@ void Board::render()
 {
     drawFrames();
     drawCells();
+    drawBlockShadow();
     currentBlock->coordsMapping();
 #ifdef INFO_ON
     int nBIF[4] = BLOCK_INFO_FRAME;
-    nextBlock->coordsMapping(
-            nBIF[0] + (BLOCK_IFNO_PANEL_WIDTH / nextBlock->getType()->blockDimension / 2) + FO / 2,
-            nBIF[1] + (BLOCK_IFNO_PANEL_HEIGHT / nextBlock->getType()->blockDimension / 2) + FO / 2,
-            false
-            );
+    int d = nextBlock->getType()->blockDimension;
+    nextBlock->coordsMapping(nBIF[0] + (BLOCK_IFNO_PANEL_WIDTH / d / 2) + FO / 2,
+                             nBIF[1] + (BLOCK_IFNO_PANEL_HEIGHT / d / 2) + FO / 2,
+                             false);
 #endif
 }
+
+#ifdef DEFAULT_TETRIS_MODE_OFF
+
+Block Board::updateBlockShadow()
+{
+    Block copy(currentBlock);
+    while (copy.falling()) continue;
+    return copy;
+}
+
+void Board::drawBlockShadow()
+{
+    blockShadow.setBrush(7);
+    blockShadow.coordsMapping();
+}
+
+#endif
 
 void Board::upperLayerDrop(int lineN)
 {
@@ -138,6 +164,7 @@ int Board::fallCheck()
             delete currentBlock;
             currentBlock = nextBlock;
             nextBlock = newBlock();
+            blockShadow = updateBlockShadow();
             return false;
         }
         else return -1;
@@ -175,14 +202,4 @@ void Board::clearLine(int lineN)
         boolStatus[lineN * CC + j] = 0;
     }
     upperLayerDrop(lineN);
-}
-
-Board::~Board()
-{
-    delete []colorStatus;
-    delete []boolStatus;
-    delete currentBlock;
-    delete nextBlock;
-    sWnd = nullptr;
-    renderer = nullptr;
 }

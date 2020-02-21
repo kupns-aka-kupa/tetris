@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include <SDL_render.h>
@@ -12,7 +11,7 @@ extern Uint8 BLACK[3];
 extern Uint8 WHITE[3];
 
 #ifdef DEFAULT_TETRIS_MODE_OFF
-    extern Uint8 *BLOCK_COLORS[7];
+    extern Uint8 *BLOCK_COLORS[8];
 #else
     extern Uint8 *BLOCK_COLORS[6];
 #endif
@@ -64,6 +63,7 @@ public:
     }
 
     Block(SDL_Renderer *renderer, bool *boolStatus);
+    Block(const Block *renderer);
 
     ~Block()
     {
@@ -74,6 +74,7 @@ public:
     int *getBrushN();
     int *getPosition();
     BlockType *getType();
+    void setBrush(int brushN);
 
     void coordsMapping(int x0 = FO, int y0 = FO, bool dynamic = true);
     void render(SDL_Rect *cell);

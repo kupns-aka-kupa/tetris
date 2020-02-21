@@ -9,9 +9,12 @@ class Board
 {
     int *colorStatus;
     bool *boolStatus;
+
     Block *currentBlock;
     Block *nextBlock;
-
+#ifdef DEFAULT_TETRIS_MODE_OFF
+    Block blockShadow;
+#endif
     SDL_Window *sWnd;
     SDL_Renderer *renderer;
 
@@ -20,10 +23,12 @@ public:
     Board(SDL_Window *sWnd, SDL_Renderer *renderer);
     ~Board();
 
-    int get_cl();
-
     void drawFrames();
     void drawCells();
+#ifdef DEFAULT_TETRIS_MODE_OFF
+    void drawBlockShadow();
+    Block updateBlockShadow();
+#endif
     void render();
 
     int keyboardHandle(SDL_KeyboardEvent *key);

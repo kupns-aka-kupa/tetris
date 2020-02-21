@@ -4,16 +4,18 @@
 
 /* Constant configuration, must not be changed */
 
-#define AUDIO_OFF
+#define AUDIO_ON
 #define PROJECT_NAME "Tetris"
 #define Tetris_VERSION_MAJOR 1
 #define Tetris_VERSION_MINOR 0
 
 #define SDL_BASIC_FLAGS (SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER)
 
+#define DEFAULT_TETRIS_MODE_OFF
+
 #ifndef AUDIO_OFF
 
-    #define MAIN_THEME "/root/cpp/tetris/static/music/maintheme.wav"
+    #define MAIN_THEME "/home/kupns/Develop/cpp/tetris/static/music/maintheme.mp3"
     #define SDL_FLAGS (SDL_BASIC_FLAGS | SDL_INIT_AUDIO)
 
 #else
@@ -22,7 +24,12 @@
 
 #endif
 
-#define MAIN_FONT "/root/cpp/tetris/static/fonts/mainfont.ttf"
+#ifdef DEFAULT_TETRIS_MODE_OFF
+    #define MAIN_FONT "/home/kupns/Develop/cpp/tetris/static/fonts/mainfont.ttf"
+#endif
+
+#define STATISTIC_FILE "/home/kupns/Develop/cpp/tetris/stat.txt"
+#define WIN_ICON "/home/kupns/Develop/cpp/tetris/static/ico/icon.ico"
 #define SWND_FLAGS SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS
 
 /*
@@ -49,7 +56,7 @@
  *      recomended : [15 - 25];
  */
 
-#define BLC_SCL 20
+#define BLC_SCL 40
 #define RC 17
 #define CC 11
 
@@ -118,6 +125,5 @@
 #define MAIN_FRAME {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}
 #define TETRIS_FRAME {FO, FO, TETRIS_WIDTH, TETRIS_HEIGHT}
 
-#define DEFAULT_TETRIS_MODE_OFF
 
 #endif //CONF_h_

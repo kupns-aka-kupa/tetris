@@ -39,14 +39,15 @@ enum BLOCK_MODIFIERS{
     FLUID
 };
 
-Uint8 *BLOCK_COLORS[7] = {
+Uint8 *BLOCK_COLORS[8] = {
     RED,
     ORANGE,
     BLUE,
     GREEN,
     MAGENTA,
     PURPLE,
-    BLACK
+    BLACK,
+    WHITE
 };
 
 #else
@@ -77,12 +78,17 @@ BlockType *Block::getType()
     return &type;
 }
 
+void Block::setBrush(int brushN)
+{
+    this->brushN = brushN;
+}
+
 Block::Block(SDL_Renderer *renderer, bool *boardBoolStatus)
 {
     this->renderer = renderer;
     boolStatus = boardBoolStatus;
 
-    int bCLen = sizeof(BLOCK_COLORS) / sizeof(&BLOCK_COLORS);
+    int bCLen = sizeof(BLOCK_COLORS) / sizeof(&BLOCK_COLORS) - 1;
     int bTLen = sizeof(BLOCK_TYPES) / sizeof(BLOCK_TYPES[0]);
     int typeIndex = std::rand() % bTLen;
 
@@ -101,6 +107,13 @@ Block::Block(SDL_Renderer *renderer, bool *boardBoolStatus)
     position[0] = int(CC / 2);
     position[1] = 0;
 }
+
+Block::Block(const Block *copy)
+    : type(copy->type),
+      renderer(copy->renderer),
+      position{copy->position[0], copy->position[1]},
+      brushN(copy->brushN),
+      boolStatus(copy->boolStatus){}
 
 void Block::render(SDL_Rect *cell)
 {

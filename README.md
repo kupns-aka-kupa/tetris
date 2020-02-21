@@ -95,13 +95,13 @@ Game options can be changed **before** compilation in **CmakeLists.txt**
 
 ___
 
-<center><h3>Game options</h3></center>
+<h3>Game options</h3>
 
 #### General
 
 - **Default game mode** (`ON` / `OFF`) = `DEFAULT_TETRIS_MODE` 
 
-- **Audio** (`ON` / `OFF`) = `AUDIO ON/OFF` (audio now not working, sorry)
+- **Audio** (`ON` / `OFF`) = `AUDIO` (audio now not working, sorry)
 
 #### Info panel
 
@@ -110,7 +110,7 @@ ___
 - **Location** (`ON` / `OFF`) = `INFO_SWAP`
 ___
 
-<center><h3>Keyboard controls</h3></center>
+<h3>Keyboard controls</h3>
 
 Action|Key  |Alternative
 ------|-----|-----------

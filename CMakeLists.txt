@@ -2,10 +2,16 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Tetris VERSION 1.0 LANGUAGES CXX)
 
+set(BLOCK_SCALE 40)
+set(ROWS_COUNT 17)
+set(COLLUMNS_COUNT 11)
+
 set(DEFAULT_TETRIS_MODE OFF)
-set(AUDIO OFF)
+set(AUDIO ON)
 set(INFO ON)
 set(INFO_SWAP OFF)
+
+set(SDL2_PATH "/usr/include/x86_64-linux-gnu/SDL2")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

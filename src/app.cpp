@@ -1,17 +1,22 @@
 #include "app.h"
 
-App::App(){
-    board = nullptr;
-    sWnd = nullptr;
-    renderer = nullptr;
-#ifdef INFO_ON
-    font = nullptr;
-#endif
+static Uint32 gameLoop(Uint32 interval, void *param)
+{
+    SDL_Event event;
+    SDL_UserEvent userevent;
 
-#ifndef AUDIO_OFF
-    musicTheme = nullptr;
-#endif
+    userevent.type = SDL_USEREVENT;
+    userevent.code = 0;
 
+    event.type = SDL_USEREVENT;
+    event.user = userevent;
+
+    SDL_PushEvent(&event);
+    return(interval);
+}
+
+App::App()
+{
     if(SDL_Init(SDL_FLAGS) == 0
 #ifdef INFO_ON
             && TTF_Init() == 0
@@ -31,28 +36,73 @@ App::App(){
                 );
 
 #ifndef AUDIO_OFF
-        Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
-        musicTheme = Mix_LoadMUS(MAIN_THEME);
+        if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0)
+        {
+            musicTheme = Mix_LoadMUS(MAIN_THEME);
+        };
 #endif
-
 #ifdef INFO_ON
         font = TTF_OpenFont(MAIN_FONT, FONT_PT_SIZE);
 #endif
         renderer = SDL_CreateRenderer(sWnd, -1, SDL_RENDERER_ACCELERATED);
 
-        SDL_Surface *icon = IMG_Load("../static/ico/icon.ico");
+        SDL_Surface *icon = IMG_Load(WIN_ICON);
         SDL_SetWindowIcon(sWnd, icon);
-
-        score = 0;
-        recordScore = 0;
-        complexityLevel = 1;
-        board = new Board(sWnd, renderer);
-        run = true;
         delete icon;
+        readStatistic();
+        run = true;
+        newGame();
+        timerID = SDL_AddTimer(1000 / complexityLevel, gameLoop, nullptr);
     }
 }
 
-void App::newGame(){
+void App::readStatistic()
+{
+    std::string line;
+    std::string pattern = "Score: ";
+    std::ifstream in(STATISTIC_FILE);
+    int tmpRecord = 0;
+    if (in.is_open())
+    {
+        while (getline(in, line))
+        {
+            size_t pos = line.find(pattern);
+            if (pos != std::string::npos)
+            {
+                int score = std::stoi(line.substr(pos + pattern.length()));
+                if (tmpRecord < score) tmpRecord = score;
+            }
+        }
+    }
+    in.close();
+    recordScore = tmpRecord;
+}
+
+void App::writeStatistic()
+{
+    std::ofstream out;
+    out.open(STATISTIC_FILE, std::ios::app);
+    if (out.is_open())
+    {
+        time_t seconds = time(NULL);
+        tm *timeinfo = localtime(&seconds);
+        int playTime = SDL_GetTicks();
+        int sec = playTime / 1000;
+        int min = sec / 60;
+        int h = min / 60;
+        out << asctime(timeinfo)
+            << ">> Score: " << score << std::endl
+            << ">> Level: " << complexityLevel << std::endl
+            << ">> Play time: " << h << "h:"
+                              << min << "m:"
+                              << sec << "s\n" << std::endl;
+    }
+    out.close();
+}
+
+void App::newGame()
+{
+    writeStatistic();
     if(score > recordScore)
     {
         recordScore = score;
@@ -61,6 +111,10 @@ void App::newGame(){
     board = new Board(sWnd, renderer);
     score = 0;
     complexityLevel = 1;
+#ifndef AUDIO_OFF
+     Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+     Mix_PlayMusic(musicTheme, -1);
+#endif
 }
 
 #ifdef INFO_ON
@@ -101,31 +155,27 @@ void App::textRender(const char *text, SDL_Rect *dstrect)
     SDL_Color color = {WHITE[0], WHITE[1], WHITE[2], 255};
     SDL_Surface *surfMessage = TTF_RenderText_Solid(font, text, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surfMessage);
-
     SDL_RenderCopy(renderer, texture, nullptr, dstrect);
-
     SDL_FreeSurface(surfMessage);
     SDL_DestroyTexture(texture);
 }
 
 #endif
 
+void App::gameLoopCheck(int fallFlag)
+{
+     if(fallFlag == 1) addScore();
+     else if (fallFlag == -1) newGame();
+}
+
 void App::update()
 {
+    std::thread keyEventThread(&App::handlE, this);
     while (run)
     {
-         handlE();
-         render();
-         if (SDL_GetTicks() % (1000 / complexityLevel) == 0) {
-             int check = board->fallCheck();
-             if(check == 1) addScore();
-             else if (check == -1) newGame();
-             else continue;
-         }
-#ifndef AUDIO_OFF
-         Mix_PlayMusic(musicTheme, -1);
-#endif
-     }
+        render();
+    }
+    keyEventThread.join();
 }
 
 void App::render()
@@ -141,36 +191,45 @@ void App::render()
 void App::addScore()
 {
     uint cl = board->checkLines();
-    score += cl * cl * 10;
-    if(score % 1000 == 0 && score != 0) complexityLevel += 1;
+    if (cl > 0)
+    {
+        score += cl * cl * 10;
+        if(score % 1000 == 0 && score != 0 && complexityLevel != 0)
+        {
+            complexityLevel += 1;
+            timerID = SDL_AddTimer(1000 / complexityLevel, gameLoop, nullptr);
+        }
+    }
 }
 
 void App::handlE()
 {
-    while (SDL_PollEvent(&event) != 0)
+    while (run)
     {
-        int check;
-        switch(event.type){
-            case SDL_KEYDOWN:
-                check = board->keyboardHandle(&event.key);
-                if(check == 1) addScore();
-                else if (check == -1) newGame();
-                else continue;
-                break;
-
-            case SDL_QUIT:
-                run = false;
-                break;
-
-            default:
-                break;
-         }
+        while (SDL_PollEvent(&event) != 0)
+        {
+            switch(event.type){
+                case SDL_KEYDOWN:
+                    gameLoopCheck(board->keyboardHandle(&event.key));
+                    break;
+                case SDL_QUIT:
+                    run = false;
+                    break;
+                case SDL_USEREVENT:
+                    gameLoopCheck(board->fallCheck());
+                    break;
+                default:
+                    break;
+             }
+        }
     }
 }
 
 App::~App()
 {
     delete board;
+    board = nullptr;
+
 #ifndef AUDIO_OFF
     Mix_FreeMusic(musicTheme);
     Mix_Quit();
@@ -182,10 +241,10 @@ App::~App()
     TTF_Quit();
     font = nullptr;
 #endif
+
     SDL_DestroyWindow(sWnd);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
-    board = nullptr;
     sWnd = nullptr;
     renderer = nullptr;
 }

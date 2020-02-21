@@ -1,6 +1,13 @@
 #pragma once
 #include <SDL.h>
 #include <SDL_image.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <thread>
+#include <chrono>
+#include <ctime>
+
 #include "board.h"
 
 #ifndef AUDIO_OFF
@@ -20,6 +27,7 @@ class App
     SDL_Window *sWnd;
     SDL_Renderer *renderer;
     SDL_Event event;
+    SDL_TimerID timerID;
     Board *board;
 
 #ifdef INFO_ON
@@ -30,21 +38,25 @@ class App
     Mix_Music *musicTheme;
 #endif
 
-
 public:
     App();
     ~App();
-
-    void newGame();
 
 #ifdef INFO_ON
     void textRender(const char *text, SDL_Rect *dstrect);
     void gameInfoRender();
 #endif
-
     void render();
-    void addScore();
-    void handlE();
+
+    void newGame();
+    void gameLoopCheck(int fallFlag);
     void update();
+    void addScore();
+
+    void handlE();
+
+    void writeStatistic();
+    void readStatistic();
+
 
 };

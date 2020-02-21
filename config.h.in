@@ -11,9 +11,11 @@
 
 #define SDL_BASIC_FLAGS (SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER)
 
+#define DEFAULT_TETRIS_MODE_${DEFAULT_TETRIS_MODE}
+
 #ifndef AUDIO_OFF
 
-    #define MAIN_THEME "${STATIC_ASSETS_PATH}/music/maintheme.ogg"
+    #define MAIN_THEME "${STATIC_ASSETS_PATH}/music/maintheme.mp3"
     #define SDL_FLAGS (SDL_BASIC_FLAGS | SDL_INIT_AUDIO)
 
 #else
@@ -22,7 +24,12 @@
 
 #endif
 
-#define MAIN_FONT "${STATIC_ASSETS_PATH}/fonts/mainfont.ttf"
+#ifdef DEFAULT_TETRIS_MODE_OFF
+    #define MAIN_FONT "${STATIC_ASSETS_PATH}/fonts/mainfont.ttf"
+#endif
+
+#define STATISTIC_FILE "${PROJECT_SOURCE_DIR}/stat.txt"
+#define WIN_ICON "${STATIC_ASSETS_PATH}/ico/icon.ico"
 #define SWND_FLAGS SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS
 
 /*
@@ -49,9 +56,9 @@
  *      recomended : [15 - 25];
  */
 
-#define BLC_SCL 20
-#define RC 17
-#define CC 11
+#define BLC_SCL ${BLOCK_SCALE}
+#define RC ${ROWS_COUNT}
+#define CC ${COLLUMNS_COUNT}
 
 // Сonfiguration-dependent values that should not be changed
 
@@ -118,6 +125,5 @@
 #define MAIN_FRAME {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}
 #define TETRIS_FRAME {FO, FO, TETRIS_WIDTH, TETRIS_HEIGHT}
 
-#define DEFAULT_TETRIS_MODE_${DEFAULT_TETRIS_MODE}
 
 #endif //CONF_h_
