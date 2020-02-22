@@ -115,7 +115,7 @@ Game options can be changed **before** compilation in **CmakeLists.txt**
 - **Location** (`ON` / `OFF`) = `INFO_SWAP`
 ___
 
-###Keyboard controls
+### Keyboard controls
 
 Action|Key  |Alternative
 ------|-----|-----------
