@@ -2,11 +2,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <thread>
-#include <chrono>
-#include <ctime>
 
 #include "board.h"
 

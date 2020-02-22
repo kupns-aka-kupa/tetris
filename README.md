@@ -14,12 +14,12 @@
 
 - [Installation](#Installation)
 
-    1. Installing SDL2 libraries:
+    1). Installing SDL2 libraries:
 
         - [Windows](#SDL2W)
         - [Linux](#SDL2L)
 
-    2. Installing Cmake 
+    2). Installing Cmake 
 
         * Windows : <https://cmake.org/download/>
         * Linux :
@@ -27,10 +27,11 @@
             apt install cmake
         ```
 
-    3. [Compile](#Compile) source code.
+    3). [Compile](#Compile) source code.
         
     
 - [Notes](#Notes)
+___
 
 ## <a name="Description"></a> Description
 
@@ -48,7 +49,9 @@ brings ***black blocks*** that are separated by modifiers and randomly accept on
 
 - `BLOWUP` : Explodes (cleans) blocks in a radius of touchdown,
 - `FAKE` : Disappears, as if he was not there,
+- `INVERSED` : Make a stroke of their shape, as at the crime scene,
 - `FLUID` : May lose its shape upon landing and clog the gaps in your tetris, if you "pour" it correctly.
+___
 
 ## <a name="Installation"></a> Installation
 
@@ -65,6 +68,7 @@ brings ***black blocks*** that are separated by modifiers and randomly accept on
     * [SDL2_image-2.0.5-win32-x86.zip](https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5-win32-x86.zip)
     * [SDL2_ttf-2.0.15-win32-x86.zip](https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.15-win32-x86.zip)
     * [SDL_mixer-1.2.12-win32.zip](https://www.libsdl.org/projects/SDL_mixer/release/SDL_mixer-1.2.12-win32.zip)
+___
 
 ### <a name="SDL2L"></a> Installing SDL2 libs on linux
 
@@ -76,6 +80,7 @@ brings ***black blocks*** that are separated by modifiers and randomly accept on
     ```bash
         yum install SDL2-devel SDL_image-devel SDL_ttf-devel SDL_mixer-devel
     ```
+___
     
 ### <a name="Compile"></a> Compile
 
@@ -86,6 +91,7 @@ brings ***black blocks*** that are separated by modifiers and randomly accept on
     cmake ..
     make
 ```
+___
 
 ## <a name="Notes"></a> Notes
 
@@ -93,9 +99,8 @@ The number of **points** received depends on the **count** of cleared lines,
 
 Game options can be changed **before** compilation in **CmakeLists.txt**
 
-___
 
-<h3>Game options</h3>
+### Game options
 
 #### General
 
@@ -105,12 +110,12 @@ ___
 
 #### Info panel
 
-- **Availability** (`ON` / `OFF`) = `INFO`
+- **Show** (`ON` / `OFF`) = `INFO`
 
 - **Location** (`ON` / `OFF`) = `INFO_SWAP`
 ___
 
-<h3>Keyboard controls</h3>
+###Keyboard controls
 
 Action|Key  |Alternative
 ------|-----|-----------

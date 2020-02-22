@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdlib>
 #include <ctime>
 #include <SDL_render.h>
 #include <SDL_rect.h>
@@ -49,7 +48,6 @@ class Block
     int position[2];
     int brushN;
     bool *boolStatus;
-
 #ifdef DEFAULT_TETRIS_MODE_OFF
     int modifier;
 #endif
@@ -71,15 +69,12 @@ public:
         renderer = nullptr;
     }
 
-    int *getBrushN();
-    int *getPosition();
-    BlockType *getType();
     void setBrush(int brushN);
 
-    void coordsMapping(int x0 = FO, int y0 = FO, bool dynamic = true);
-    void render(SDL_Rect *cell);
-    void renderStatic(int x0, int y0);
-    void flow(int row, int collumn, int *boardColorStatus);
+    void render(int x0 = FO, int y0 = FO, bool dynamic = true);
+    void drawCell(SDL_Rect *cell);
+    void renderPrewiew();
+    void setBoardCell(int row, int collumn, int *boardColorStatus);
 
     bool freeze(int *boardColorStatus);
     bool falling();

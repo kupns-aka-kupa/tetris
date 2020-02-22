@@ -116,13 +116,9 @@ void Board::render()
     drawFrames();
     drawCells();
     drawBlockShadow();
-    currentBlock->coordsMapping();
+    currentBlock->render();
 #ifdef INFO_ON
-    int nBIF[4] = BLOCK_INFO_FRAME;
-    int d = nextBlock->getType()->blockDimension;
-    nextBlock->coordsMapping(nBIF[0] + (BLOCK_IFNO_PANEL_WIDTH / d / 2) + FO / 2,
-                             nBIF[1] + (BLOCK_IFNO_PANEL_HEIGHT / d / 2) + FO / 2,
-                             false);
+    nextBlock->renderPrewiew();
 #endif
 }
 
@@ -138,7 +134,7 @@ Block Board::updateBlockShadow()
 void Board::drawBlockShadow()
 {
     blockShadow.setBrush(7);
-    blockShadow.coordsMapping();
+    blockShadow.render();
 }
 
 #endif

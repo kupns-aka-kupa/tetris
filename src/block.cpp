@@ -34,6 +34,7 @@ static BlockType BLOCK_TYPES[7]
 
 enum BLOCK_MODIFIERS{
     STANDART,
+    INVERTED,
     BLOWUP,
     FAKE,
     FLUID
@@ -63,26 +64,11 @@ Uint8 *BLOCK_COLORS[6] = {
 
 #endif
 
-int *Block::getPosition()
-{
-    return position;
-}
-
-int *Block::getBrushN()
-{
-    return &brushN;
-}
-
-BlockType *Block::getType()
-{
-    return &type;
-}
-
 void Block::setBrush(int brushN)
 {
     this->brushN = brushN;
 }
-
+#include <iostream>
 Block::Block(SDL_Renderer *renderer, bool *boardBoolStatus)
 {
     this->renderer = renderer;
@@ -96,14 +82,12 @@ Block::Block(SDL_Renderer *renderer, bool *boardBoolStatus)
     brushN = std::rand() % bCLen;
 #ifdef DEFAULT_TETRIS_MODE_OFF
     if (brushN != 6) modifier = STANDART;
-    else modifier = std::rand() % 3 + 1;
+    else modifier = std::rand() % (sizeof(BLOCK_MODIFIERS) - 1) + 1;
 #endif
     type = BlockType(
         BLOCK_TYPES[typeIndex].boolFilter,
         BLOCK_TYPES[typeIndex].blockMatrLen,
-        BLOCK_TYPES[typeIndex].blockDimension
-        );
-
+        BLOCK_TYPES[typeIndex].blockDimension);
     position[0] = int(CC / 2);
     position[1] = 0;
 }
@@ -115,7 +99,7 @@ Block::Block(const Block *copy)
       brushN(copy->brushN),
       boolStatus(copy->boolStatus){}
 
-void Block::render(SDL_Rect *cell)
+void Block::drawCell(SDL_Rect *cell)
 {
     SDL_SetRenderDrawColor(renderer, BLOCK_COLORS[brushN][0], BLOCK_COLORS[brushN][1], BLOCK_COLORS[brushN][2], 0xFF);
     SDL_RenderFillRect(renderer, cell);
@@ -123,7 +107,16 @@ void Block::render(SDL_Rect *cell)
     SDL_RenderDrawRect(renderer, cell);
 }
 
-void Block::coordsMapping(int x0, int y0, bool dynamic)
+void Block::renderPrewiew()
+{
+    int nBIF[4] = BLOCK_INFO_FRAME;
+    int d = type.blockDimension;
+    render(nBIF[0] + (BLOCK_IFNO_PANEL_WIDTH / d / 2) + FO / 2,
+           nBIF[1] + (BLOCK_IFNO_PANEL_HEIGHT / d / 2) + FO / 2,
+           false);
+}
+
+void Block::render(int x0, int y0, bool dynamic)
 {
     for(int i = 0; i < type.blockDimension; i++)
     {
@@ -150,7 +143,7 @@ void Block::coordsMapping(int x0, int y0, bool dynamic)
                         BLC_SCL
                     };
                 }
-                render(&cell);
+                drawCell(&cell);
             }
         }
     }
@@ -171,9 +164,9 @@ bool Block::check(int x_vector, int y_vector, bool *newFilter)
  *      according to the movement vector (int x_vector), (int y_vector)
  *
  *  (int y_vector) can only be equal int(1),
- *      while (int x_vector)----->int(1)
+ *      while (int x_vector)-----> int(1)
  *                             \
- *                              ->int(-1)
+ *                              -> int(-1)
  *
  *  Below in the form of links will be an explanation of each expression in the body
  *      of that function:
@@ -293,31 +286,38 @@ bool Block::freeze(int *boardColorStatus)
             {
                 if (cell)
                 {
+                    if (modifier == STANDART)
+                    {
+                        setBoardCell(i, j, boardColorStatus);
+                    }
 #ifdef DEFAULT_TETRIS_MODE_OFF
-                    if (modifier == FLUID)
+                    else if (modifier == FLUID)
                     {
                         int row = i;
                         while(row + position[1] + 1 <= RC && !boolStatus[(row + position[1]) * CC + j + position[0]])
                         {
-                            flow(row, j, boardColorStatus);
+                            setBoardCell(row, j, boardColorStatus);
                             row++;
                         }
                     }
-                    else
-                    {
-#endif
-                        flow(i, j, boardColorStatus);
-#ifdef DEFAULT_TETRIS_MODE_OFF
-                    }
 #endif
                 }
+#ifdef DEFAULT_TETRIS_MODE_OFF
+                else
+                {
+                    if (modifier == INVERTED)
+                    {
+                        setBoardCell(i, j, boardColorStatus);
+                    }
+                }
+#endif
             }
         }
     }
     return true;
 }
 
-void Block::flow(int row, int collumn, int *boardColorStatus)
+void Block::setBoardCell(int row, int collumn, int *boardColorStatus)
 {
     boolStatus[(row + position[1]) * CC + collumn + position[0]] = 1;
     boardColorStatus[(row + position[1]) * CC + collumn + position[0]] = brushN;
